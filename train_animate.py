@@ -14,7 +14,7 @@ Usage:
 
 import sys
 from constants import DEFAULT_DATA_FILE, DEFAULT_LEARNING_RATE
-from train import read_data, normalize_data, estimate_price, calculate_cost, denormalize_theta
+from train import read_dataset, normalize_data, calculate_cost, denormalize_thetas
 
 
 DEFAULT_ANIMATION_ITERATIONS = 1000
@@ -28,7 +28,7 @@ def calculate_mse(mileages, prices, theta0, theta1):
     total_squared_error = 0
     
     for i in range(m):
-        prediction = estimate_price(mileages[i], theta0, theta1)
+        prediction = theta0 + theta1 * mileages[i]
         error = prices[i] - prediction
         total_squared_error += error * error
     
@@ -56,7 +56,7 @@ def calculate_r2(mileages, prices, theta0, theta1):
     # Compute SS_res
     ss_res = 0
     for i in range(m):
-        prediction = estimate_price(mileages[i], theta0, theta1)
+        prediction = theta0 + theta1 * mileages[i]
         error = prices[i] - prediction
         ss_res += error * error
     
@@ -125,7 +125,7 @@ def train_and_collect_iterations(mileages_norm, prices_norm, learning_rate, max_
         sum_error_theta1 = 0
         
         for i in range(m):
-            prediction = estimate_price(mileages_norm[i], theta0, theta1)
+            prediction = theta0 + theta1 * mileages_norm[i]
             error = prediction - prices_norm[i]
             sum_error_theta0 += error
             sum_error_theta1 += error * mileages_norm[i]
@@ -223,7 +223,7 @@ def visualize_interactive(mileages, prices, iterations, mile_mean, mile_std, pri
         theta0_norm, theta1_norm, cost, metric_value, no_improve, last_cost_change = iterations[iter_idx]
         
         # Denormalize theta values
-        theta0_real, theta1_real = denormalize_theta(
+        theta0_real, theta1_real = denormalize_thetas(
             theta0_norm, theta1_norm,
             mile_mean, mile_std,
             price_mean, price_std
@@ -516,7 +516,7 @@ def main():
     
     # Read data
     print("\nReading data...")
-    mileages, prices = read_data(DEFAULT_DATA_FILE)
+    mileages, prices = read_dataset(DEFAULT_DATA_FILE)
     print(f"  Loaded {len(mileages)} data points.")
     
     # Normalize data
